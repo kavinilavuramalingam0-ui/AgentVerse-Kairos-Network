@@ -1,0 +1,20 @@
+{
+  "user_type": "Hosteller & Hackathon Developer",
+  "campus_rules": {
+    "hostel_curfew_time": "05:00 PM",
+    "college_hours": "08:40 AM - 04:10 PM",
+    "outside_movement_allowed_window": "08:30 AM - 05:00 PM"
+  },
+  "physiological_baselines": {
+    "breakfast_window": "08:00 AM - 08:30 AM",
+    "lunch_window": "01:00 PM - 02:00 PM",
+    "dinner_window": "07:30 PM - 08:30 PM",
+    "sleep_schedule_standard": "12:00 AM - 07:15 AM",
+    "sleep_schedule_heavy_work": "01:30 AM - 07:45 AM"
+  },
+  "physical_reality_rules": {
+    "laundry_drying_gap_hours": 3,
+    "travel_buffer_mins_between_campus_and_market": 20,
+    "evening_hackathon_grind_window": "05:00 PM - 11:30 PM"
+  }
+}
