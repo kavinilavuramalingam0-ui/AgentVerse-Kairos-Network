@@ -1,6 +1,7 @@
 import os
 import json
-from agents.scheduling_agent import SchedulingAgent
+from agents.scheduling_agent.scheduling_agent import SchedulingAgent
+from agents.workflow_agent.workflow_agent import WorkflowAgent
 from tools.calendar_tool import add_to_calendar, get_todays_events
 
 def load_or_create_profile(user_name: str) -> dict:
@@ -38,45 +39,70 @@ def load_or_create_profile(user_name: str) -> dict:
 
 def main():
     print("===================================================")
-    print("          Kairos: AUTONOMOUS LIFE COMPANION        ")
+    print("          The Kairos Network: MULTI-AGENT ORCHESTRATOR         ")
     print("===================================================")
     
     user_name = input("Enter User/Judge Name (e.g., Kavinilavu): ").strip()
     profile_data = load_or_create_profile(user_name)
-    agent = SchedulingAgent(profile_data=profile_data)
+    
+    # Initialize both agents safely
+    scheduling_agent = SchedulingAgent(profile_data=profile_data)
+    workflow_agent = WorkflowAgent()
     
     while True:
         print("\n---------------------------------------------------")
-        user_input = input("Enter your tasks for today (or type 'exit' to quit):\n> ")
+        print("Choose Input Mode:")
+        print("1. Direct Task (e.g., 'Build agents for 4 hours')")
+        print("2. Paste Email/Message to Auto-Extract (Workflow Agent)")
+        print("Type 'exit' to quit.")
         
-        if user_input.lower() in ['exit', 'quit']:
+        mode = input("> ").strip()
+        
+        if mode.lower() in ['exit', 'quit']:
             print("Shutting down AuraOS...")
             break
-        if not user_input.strip(): continue
+            
+        if mode == "1":
+            user_input = input("\nEnter your tasks:\n> ")
+        elif mode == "2":
+            raw_email = input("\nPaste the email/message here:\n> ")
+            
+            # --- SAFE MULTI-AGENT HANDOFF ---
+            # 1. Agent 2 extracts the tasks
+            analysis = workflow_agent.analyze_message(raw_email)
+            if not analysis or not analysis.actionable_tasks:
+                print("[INFO] No actionable tasks found in this message.")
+                continue
+                
+            print(f"\n[AGENT 2] Extracted Intent: {analysis.sender_intent}")
+            
+            # 2. Format Agent 2's output into a clean string for Agent 1
+            user_input = "Please schedule these extracted tasks:\n"
+            for t in analysis.actionable_tasks:
+                user_input += f"- {t.task_name} (Priority: {t.priority}, Est: {t.estimated_duration_mins} mins)\n"
+                print(f" -> Found Task: {t.task_name} ({t.estimated_duration_mins} mins)")
+        else:
+            continue
 
-        print("\n[AGENT] Reasoning & Planning your optimal schedule...")
+        print("\n[AGENT 1] Reasoning & Planning your optimal schedule...")
         current_schedule = get_todays_events()
         print("\n" + current_schedule) 
         
-        schedule_data = agent.schedule_day(user_input, current_schedule)
+        schedule_data = scheduling_agent.schedule_day(user_input, current_schedule)
         
         if schedule_data:
-            print("\n[AGENT] Schedule Generated! Executing real-world actions...")
+            print("\n[AGENT 1] Schedule Generated! Executing real-world actions...")
             for task in schedule_data.schedule:
                 
-                # --- THE DETERMINISTIC SHIELD ---
-                # 1. Check if the LLM flagged it as an old task
+                # --- YOUR DETERMINISTIC SHIELD (SAFE AND INTACT) ---
                 if hasattr(task, 'is_new_task') and not task.is_new_task:
                     print(f"[INFO] Skipping flagged baseline/existing task: {task.task_name}")
                     continue
                 
-                # 2. Check if the task name matches ANY text in the current schedule (Foolproof)
-                # We use lower() and strip() to ensure a tight text match.
-                # E.g., if "Codestreet" is in the calendar string, drop it immediately.
                 if current_schedule != "No events scheduled for today." and task.task_name.strip().lower() in current_schedule.lower():
                     print(f"[SHIELD] Blocked duplicate event: {task.task_name}")
                     continue
-                # ---------------------------------
+                # ---------------------------------------------------
                 
                 if "drying" in task.task_name.lower():
                     print(f"[INFO] Skipping passive task: {task.task_name}")

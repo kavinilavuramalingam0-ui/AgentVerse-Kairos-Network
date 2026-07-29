@@ -16,3 +16,4 @@ class DailySchedule(BaseModel):
     date_context: str = Field(description="Day context summary")
     total_tasks: int = Field(description="Total count of scheduled entries")
     schedule: List[ScheduledTask] = Field(description="Chronological list of tasks")
+

@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
-from schemas.schedule_schema import DailySchedule
+from agents.scheduling_agent.schedule_schema import DailySchedule
 
 load_dotenv()
 
