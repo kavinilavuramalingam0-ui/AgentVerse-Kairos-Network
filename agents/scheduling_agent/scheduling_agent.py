@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
-from agents.scheduling_agent.schedule_schema import DailySchedule
+from .schedule_schema import DailySchedule
 
 load_dotenv()
 
@@ -21,28 +21,31 @@ class SchedulingAgent:
         
         self.prompt = ChatPromptTemplate.from_messages([
             ("system", 
-             "You are AuraOS, an Autonomous Life Companion & Scheduling Agent.\n"
-             "Analyze user tasks and create a realistic schedule. You MUST read the Existing Schedule and NEVER overlap new tasks with existing events.\n\n"
+             "You are The Kairos Network's Core Scheduling Agent.\n"
+             "Your supreme directive is to NEVER double-book events.\n\n"
+             "=== LIVE CLOCK ===\n"
+             "Current Date & Time: {current_datetime}\n\n"
              "=== USER PROFILE & HARD CONSTRAINTS ===\n"
              "{profile_data}\n\n"
              "=== EXISTING CALENDAR EVENTS ===\n"
              "{existing_schedule}\n\n"
-             "=== STRICT SCHEDULING RULES ===\n"
-             "1. CLASSIFICATION RULE: For every task in the JSON output, you MUST set 'is_new_task' to false if it is an existing calendar event, meal, or sleep. Set to true ONLY for the brand new tasks requested by the user.\n"
-             "2. INVISIBLE CONSTRAINTS: Respect sleep schedules, college hours, and meal windows implicitly. Do not push them to the calendar if they aren't explicitly requested.\n"
-             "3. CONFLICT AVOIDANCE: Find empty gaps in the EXISTING CALENDAR EVENTS to place the new tasks.\n"
-             "4. LAUNDRY PHYSICS: Insert a passive 'Drying Clothes' gap of at least 3 hours between washing and folding.\n"
+             "=== REASONING & SCHEDULING RULES ===\n"
+             "1. THE AUDIT: You must first fill out the 'calendar_audit_log' by analyzing the EXISTING CALENDAR EVENTS compared to the LIVE CLOCK.\n"
+             "2. CROSS-MIDNIGHT SCHEDULING: The biological working day does not end at 11:59 PM. You are permitted to schedule tasks past midnight (e.g., 12:30 AM, 01:00 AM) up until the defined sleep bounds. \n"
+             "3. STRICT AVOIDANCE: If an event spans 5:00 PM to 10:00 PM, that 5-hour block is a DEAD ZONE. Find an earlier or later gap.\n"
+             "4. CLASSIFICATION: Set 'is_new_task' to false for existing calendar events. Set to true ONLY for the brand new extracted tasks.\n"
              "5. TIME MATH: Ensure end_time strictly follows start_time + duration_mins."
             ),
-            ("human", "Here are my tasks to add for today:\n{tasks}")
+            ("human", "Here are the tasks to analyze and schedule:\n{tasks}")
         ])
         
         self.chain = self.prompt | self.structured_llm
 
-    def schedule_day(self, raw_input_text: str, existing_schedule_text: str) -> DailySchedule:
-        print("[System] AuraOS LangChain Pipeline Initiated (Context-Aware)...")
+    def schedule_day(self, raw_input_text: str, existing_schedule_text: str, current_time_str: str) -> DailySchedule:
+        print("[System] Kairos Network Pipeline Initiated (Time-Aware)...")
         try:
             return self.chain.invoke({
+                "current_datetime": current_time_str,
                 "profile_data": json.dumps(self.user_profile, indent=2),
                 "existing_schedule": existing_schedule_text,
                 "tasks": raw_input_text

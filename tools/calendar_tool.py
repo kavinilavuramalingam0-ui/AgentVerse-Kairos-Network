@@ -5,15 +5,16 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-SCOPES = ['https://www.googleapis.com/auth/calendar']
+SCOPES = [
+    'https://www.googleapis.com/auth/calendar', 
+    'https://www.googleapis.com/auth/gmail.modify'
+]
 CREDENTIALS_FILE = 'credentials.json'
 
 def authenticate_oauth():
-    """Authenticates using OAuth2 and saves token.json."""
     creds = None
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-        
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -22,30 +23,30 @@ def authenticate_oauth():
                 raise FileNotFoundError(f"[ERROR] '{CREDENTIALS_FILE}' is missing.")
             flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_FILE, SCOPES)
             creds = flow.run_local_server(port=0)
-            
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
-            
     return build('calendar', 'v3', credentials=creds)
 
 def get_todays_events() -> str:
-    print("\n[SYSTEM] Agent is checking your calendar for existing conflicts (OAuth2)...")
+    print("\n[SYSTEM] Agent is checking the calendar for conflicts (Cross-Midnight Window)...")
     try:
         service = authenticate_oauth()
-        today = datetime.datetime.today()
-        start_of_day = today.replace(hour=0, minute=0, second=0).isoformat() + "+05:30"
-        end_of_day = today.replace(hour=23, minute=59, second=59).isoformat() + "+05:30"
+        now = datetime.datetime.now()
+        
+        start_of_window = now.isoformat() + "+05:30"
+        tomorrow = now + datetime.timedelta(days=1)
+        end_of_window = tomorrow.replace(hour=4, minute=0, second=0).isoformat() + "+05:30"
         
         events_result = service.events().list(
-            calendarId='primary', timeMin=start_of_day, timeMax=end_of_day, 
+            calendarId='primary', timeMin=start_of_window, timeMax=end_of_window, 
             singleEvents=True, orderBy='startTime'
         ).execute()
         
         events = events_result.get('items', [])
         if not events:
-            return "No events scheduled for today."
+            return "No events scheduled for the upcoming window."
             
-        formatted_events = "=== EXISTING CALENDAR EVENTS FOR TODAY ===\n"
+        formatted_events = "=== EXISTING CALENDAR EVENTS (NEXT 9 HOURS) ===\n"
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
             end = event['end'].get('dateTime', event['end'].get('date'))
@@ -60,19 +61,26 @@ def get_todays_events() -> str:
         return "Warning: Could not fetch calendar data."
 
 def parse_and_validate_time_range(start_str: str, end_str: str):
-    today_date = datetime.datetime.today().strftime('%Y-%m-%d')
+    now = datetime.datetime.now()
+    
     try:
-        start_dt = datetime.datetime.strptime(f"{today_date} {start_str.strip()}", "%Y-%m-%d %I:%M %p")
+        start_t = datetime.datetime.strptime(start_str.strip(), "%I:%M %p").time()
     except ValueError:
-        start_dt = datetime.datetime.today()
+        start_t = now.time()
 
     try:
-        end_dt = datetime.datetime.strptime(f"{today_date} {end_str.strip()}", "%Y-%m-%d %I:%M %p")
+        end_t = datetime.datetime.strptime(end_str.strip(), "%I:%M %p").time()
     except ValueError:
-        end_dt = start_dt + datetime.timedelta(minutes=30)
+        end_t = (datetime.datetime.combine(now.date(), start_t) + datetime.timedelta(minutes=30)).time()
 
+    start_dt = datetime.datetime.combine(now.date(), start_t)
+    end_dt = datetime.datetime.combine(now.date(), end_t)
+
+    if now.time() > datetime.time(12, 0) and start_t < datetime.time(6, 0):
+        start_dt += datetime.timedelta(days=1)
+        
     if end_dt <= start_dt:
-        end_dt = start_dt + datetime.timedelta(minutes=30)
+        end_dt += datetime.timedelta(days=1)
 
     return start_dt.isoformat() + "+05:30", end_dt.isoformat() + "+05:30"
 

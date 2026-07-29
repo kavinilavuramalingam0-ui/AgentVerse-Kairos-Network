@@ -3,8 +3,8 @@ from typing import List
 
 class ScheduledTask(BaseModel):
     task_name: str = Field(description="Name of the task")
-    reasoning: str = Field(description="Explain WHY this start time was chosen.")
-    is_new_task: bool = Field(description="Set to True ONLY for newly requested tasks. False for existing events or daily meals.")
+    reasoning: str = Field(description="Explain WHY this start time was chosen and how you ensured it does not overlap with the audit log.")
+    is_new_task: bool = Field(description="Set to True ONLY for newly requested tasks. False for existing events.")
     start_time: str = Field(description="Start time in HH:MM AM/PM format")
     end_time: str = Field(description="End time in HH:MM AM/PM format")
     duration_mins: int = Field(description="Duration in minutes")
@@ -13,7 +13,8 @@ class ScheduledTask(BaseModel):
     notes: str = Field(default="", description="Additional context")
 
 class DailySchedule(BaseModel):
+    # THE FIX: This forces the LLM to reason about time before generating the schedule.
+    calendar_audit_log: str = Field(description="CRITICAL: Write a paragraph analyzing the EXISTING CALENDAR EVENTS. Explicitly list the blocked time windows (e.g., '5:00 PM to 10:00 PM is occupied by XYZ'). State clearly which gaps are available.")
     date_context: str = Field(description="Day context summary")
     total_tasks: int = Field(description="Total count of scheduled entries")
     schedule: List[ScheduledTask] = Field(description="Chronological list of tasks")
-
