@@ -3,8 +3,8 @@ from typing import List
 
 class ScheduledTask(BaseModel):
     task_name: str = Field(description="Name of the task")
-    # CoT happens here: The LLM must reason BEFORE assigning the time.
-    reasoning: str = Field(description="Explain WHY this start time was chosen. Check prior dependencies (like drying clothes) or curfews.")
+    reasoning: str = Field(description="Explain WHY this start time was chosen.")
+    is_new_task: bool = Field(description="Set to True ONLY for newly requested tasks. False for existing events or daily meals.")
     start_time: str = Field(description="Start time in HH:MM AM/PM format")
     end_time: str = Field(description="End time in HH:MM AM/PM format")
     duration_mins: int = Field(description="Duration in minutes")

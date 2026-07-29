@@ -5,7 +5,6 @@ from tools.calendar_tool import add_to_calendar, get_todays_events
 
 def load_or_create_profile(user_name: str) -> dict:
     profile_path = f"data/{user_name}_profile.json"
-    
     if os.path.exists(profile_path):
         print(f"[MEMORY] Welcome back, {user_name}! Loading your constraints.")
         with open(profile_path, "r") as f:
@@ -39,13 +38,11 @@ def load_or_create_profile(user_name: str) -> dict:
 
 def main():
     print("===================================================")
-    print("      AGENTVERSE: AUTONOMOUS LIFE COMPANION        ")
+    print("          Kairos: AUTONOMOUS LIFE COMPANION        ")
     print("===================================================")
     
-    user_name = input("Enter User/Judge Name (e.g., Kavinilavu, Judge1): ").strip()
+    user_name = input("Enter User/Judge Name (e.g., Kavinilavu): ").strip()
     profile_data = load_or_create_profile(user_name)
-    
-    print("\n--- Initializing Agentic Brain ---")
     agent = SchedulingAgent(profile_data=profile_data)
     
     while True:
@@ -53,41 +50,41 @@ def main():
         user_input = input("Enter your tasks for today (or type 'exit' to quit):\n> ")
         
         if user_input.lower() in ['exit', 'quit']:
-            print("Shutting down agent...")
+            print("Shutting down AuraOS...")
             break
-            
-        if not user_input.strip():
-            continue
+        if not user_input.strip(): continue
 
         print("\n[AGENT] Reasoning & Planning your optimal schedule...")
-        
-        # 1. PERCEPTION: Read the calendar using OAuth2
         current_schedule = get_todays_events()
         print("\n" + current_schedule) 
         
-        # 2. DECISION: Pass both user input AND current schedule to LangChain
         schedule_data = agent.schedule_day(user_input, current_schedule)
         
-        # 3. ACTION: Execute the tools using OAuth2
         if schedule_data:
             print("\n[AGENT] Schedule Generated! Executing real-world actions...")
-            
             for task in schedule_data.schedule:
-                # Skip passive tasks from cluttering the calendar
+                
+                # --- THE DETERMINISTIC SHIELD ---
+                # 1. Check if the LLM flagged it as an old task
+                if hasattr(task, 'is_new_task') and not task.is_new_task:
+                    print(f"[INFO] Skipping flagged baseline/existing task: {task.task_name}")
+                    continue
+                
+                # 2. Check if the task name matches ANY text in the current schedule (Foolproof)
+                # We use lower() and strip() to ensure a tight text match.
+                # E.g., if "Codestreet" is in the calendar string, drop it immediately.
+                if current_schedule != "No events scheduled for today." and task.task_name.strip().lower() in current_schedule.lower():
+                    print(f"[SHIELD] Blocked duplicate event: {task.task_name}")
+                    continue
+                # ---------------------------------
+                
                 if "drying" in task.task_name.lower():
                     print(f"[INFO] Skipping passive task: {task.task_name}")
                     continue
                     
-                # TRIGGER REAL GOOGLE CALENDAR API
-                add_to_calendar(
-                    task_name=task.task_name,
-                    start_time=task.start_time,
-                    end_time=task.end_time,
-                    location=task.location
-                )
-            
-            print("\n[SUCCESS] All tasks pushed to your Google Calendar!")
-            print("Check your calendar on your phone/browser.")
+                add_to_calendar(task.task_name, task.start_time, task.end_time, task.location)
+                
+            print("\n[SUCCESS] Tasks pushed to Google Calendar!")
 
 if __name__ == "__main__":
     main()
