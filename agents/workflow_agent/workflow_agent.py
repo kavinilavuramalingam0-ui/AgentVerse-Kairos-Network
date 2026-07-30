@@ -29,10 +29,17 @@ class WorkflowAgent:
         
         self.chain = self.prompt | self.structured_llm
 
-    def analyze_message(self, raw_message: str) -> EmailAnalysis:
+    # Inside agents/workflow_agent/agent.py
+
+    def analyze_message(self, raw_text: str):
         print("[System] Workflow Agent analyzing inbound communication...")
         try:
-            return self.chain.invoke({"message": raw_message})
+            # Invoking the LLM to extract structured data
+            result = self.chain.invoke({"message": raw_text})
+            return result
+            
         except Exception as e:
-            print(f"[Execution Error] Workflow Agent failed: {e}")
+            # Safely catch Groq API 400 errors, JSON parsing errors, or hallucinations
+            print(f"[Execution Error] Workflow Agent failed to parse tool call: {e}")
+            print("[INFO] Skipping this message due to extraction failure.")
             return None

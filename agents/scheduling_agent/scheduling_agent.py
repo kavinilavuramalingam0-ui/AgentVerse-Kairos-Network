@@ -19,6 +19,10 @@ class SchedulingAgent:
         
         self.structured_llm = self.llm.with_structured_output(DailySchedule)
         
+        # Inside agents/scheduling_agent/agent.py
+
+        # Inside agents/scheduling_agent/agent.py
+
         self.prompt = ChatPromptTemplate.from_messages([
             ("system", 
              "You are The Kairos Network's Core Scheduling Agent.\n"
@@ -31,10 +35,11 @@ class SchedulingAgent:
              "{existing_schedule}\n\n"
              "=== REASONING & SCHEDULING RULES ===\n"
              "1. THE AUDIT: You must first fill out the 'calendar_audit_log' by analyzing the EXISTING CALENDAR EVENTS compared to the LIVE CLOCK.\n"
-             "2. CROSS-MIDNIGHT SCHEDULING: The biological working day does not end at 11:59 PM. You are permitted to schedule tasks past midnight (e.g., 12:30 AM, 01:00 AM) up until the defined sleep bounds. \n"
+             "2. CROSS-MIDNIGHT SCHEDULING: The biological working day does not end at 11:59 PM. You are permitted to schedule tasks past midnight up until the defined sleep bounds.\n"
              "3. STRICT AVOIDANCE: If an event spans 5:00 PM to 10:00 PM, that 5-hour block is a DEAD ZONE. Find an earlier or later gap.\n"
              "4. CLASSIFICATION: Set 'is_new_task' to false for existing calendar events. Set to true ONLY for the brand new extracted tasks.\n"
-             "5. TIME MATH: Ensure end_time strictly follows start_time + duration_mins."
+             "5. TIME MATH: Ensure end_time strictly follows start_time + duration_mins.\n"
+             "6. PASSIVE TASKS (CRITICAL): Ignore tasks that do not require active human effort (e.g., 'drying clothes', 'waiting for Docker containers to build', 'system updates'). Do NOT output these into the schedule array."
             ),
             ("human", "Here are the tasks to analyze and schedule:\n{tasks}")
         ])
