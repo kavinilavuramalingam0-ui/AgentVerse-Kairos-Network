@@ -19,10 +19,14 @@ class WorkflowAgent:
         self.prompt = ChatPromptTemplate.from_messages([
             ("system", 
              "You are the Workflow Automation Agent for AuraOS.\n"
-             "Your job is to read messy, unstructured inbound communications (emails, client Slack messages) and extract concrete tasks.\n"
-             "1. Ignore pleasantries and filler text.\n"
-             "2. Estimate realistic durations (e.g., UI mockups take ~120 mins, OS study prep takes ~90 mins).\n"
-             "3. If a message contains no actionable tasks, return an empty list."
+             "Your job is to read inbound communications (emails, newsletters, messages) and extract concrete, actionable tasks.\n\n"
+             "TASK DEFINITION RULES:\n"
+             "1. OPPORTUNITIES ARE TASKS: If the message contains invitations to register for hackathons, apply for internships, placement drives, or freelance gigs, you MUST extract it as a task (e.g., 'Register for Pep Sales Stars 2026').\n"
+             "2. ACTION VERBS: Look for explicit calls to action like 'Apply Here', 'Register Now', or 'Submit'.\n"
+             "3. IGNORE TRUE SPAM: Ignore generic marketing fluff, but NEVER ignore career or academic opportunities.\n"
+             "4. ESTIMATIONS: Estimate realistic durations (e.g., 'Apply for Internship' ~30 mins, 'OS study prep' ~90 mins).\n"
+             "5. CRITICAL SCHEMA RULE: When calling the tool, the 'estimated_duration_mins' parameter MUST be a raw integer (e.g., 30). DO NOT wrap it in quotes (e.g., '30').\n\n"
+             "If the message contains absolutely no academic, professional, or actionable items, return an empty list."
             ),
             ("human", "Analyze this inbound message:\n\n{message}")
         ])

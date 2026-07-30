@@ -84,9 +84,30 @@ def main():
             break
             
         if mode == "1":
-            user_input = input("\nEnter your tasks:\n> ")
-            process_and_schedule_input(user_input, scheduling_agent, workflow_agent)
+            # DIRECT TASK MODE: Bypasses Agent 2 entirely and talks directly to Agent 1
+            user_input = input("\nEnter your tasks directly for scheduling:\n> ")
+            print("\n[AGENT 1] Reasoning & Planning your optimal schedule...")
             
+            current_schedule = get_todays_events()
+            current_time_str = datetime.datetime.now().astimezone().strftime('%A, %B %d, %Y %I:%M %p %Z')
+            
+            # Agent 1 handles the raw natural language directly
+            schedule_data = scheduling_agent.schedule_day(user_input, current_schedule, current_time_str)
+            
+            if schedule_data:
+                print(f"\n[AUDIT LOG]\n{schedule_data.calendar_audit_log}\n")
+                print("[AGENT 1] Executing real-world actions...")
+                
+                for task in schedule_data.schedule:
+                    if hasattr(task, 'is_new_task') and not task.is_new_task:
+                        continue
+                    if current_schedule != "No events scheduled for the upcoming window." and task.task_name.strip().lower() in current_schedule.lower():
+                        print(f"[SHIELD] Blocked duplicate event: {task.task_name}")
+                        continue
+                        
+                    add_to_calendar(task.task_name, task.start_time, task.end_time, task.location)
+                    
+                print("\n[SUCCESS] Tasks pushed to Google Calendar!")   
         elif mode == "2":
             raw_email = input("\nPaste the email/message here:\n> ")
             process_and_schedule_input(raw_email, scheduling_agent, workflow_agent)
