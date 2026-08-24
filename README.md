@@ -85,10 +85,12 @@ The Scheduling and Workflow agents require permissions to read/write Google Cale
    - Go to **APIs & Services → Library**.
    - Search for **Google Calendar API** and enable it.
    - Search for **Gmail API** and enable it.
+     <img width="898" height="497" alt="Screenshot 2026-08-24 114757" src="https://github.com/user-attachments/assets/b6e207d1-496a-4ff2-be74-93401347244f" /><br>
 4. Configure the OAuth consent screen:
    - Go to **APIs & Services → OAuth consent screen**.
    - Configure the required application details.
    - Add the required Google Calendar and Gmail scopes.
+     <img width="627" height="486" alt="Screenshot 2026-08-24 115140" src="https://github.com/user-attachments/assets/d1dfb1d9-1edd-498a-8129-fb3a3460db29" /><br>
 5. Create OAuth credentials:
    - Go to **APIs & Services → Credentials**.
    - Click **Create Credentials → OAuth client ID**.
@@ -110,27 +112,46 @@ On the first run of the project, `token.json` will not exist.
   2. On the permissions screen, select all checkboxes granting access to both **Google Calendar** and **Gmail**.
   3. Click **Continue** until the browser window displays **"The authentication flow has completed."**
   4. You may close the browser window.
+     <img width="940" height="382" alt="image" src="https://github.com/user-attachments/assets/cd6f302c-1483-483f-9945-36626f86e318" /><br>
 
 ## 6. Revoking or Resetting Tokens
 
 Deleting `token.json` removes the local session key and forces a fresh OAuth login on the next run.
 
-## 7. Running the Application<br>
+## 7. Running the Application
 
-   terminal orchestrator (main.py)<br>
-   ```bash
-   python main.py
-   ```
-<br>
-        Startup Notice-Please Be Patient:<br>
-                Launching main.py takes time to load. During startup, Agent 3 (Knowledge Agent) must load the Hugging Face embedding model (sentence-transformers/all-MiniLM-L6-v2) locally, parse your study documents in data/study_materials/, and build the Vector Index in memory. Once initialization finishes, the main terminal menu appears.<br>
-   <img width="1088" height="792" alt="image" src="https://github.com/user-attachments/assets/0175a5a1-fc8f-4a36-a8d1-80dd759b383e" /><br>
-         user.json file tells about the specific user's profile/lifestyle<br>
-   <img width="986" height="602" alt="image" src="https://github.com/user-attachments/assets/005e0778-ab9a-400d-a1e4-ec1a3e040832" /><br>
+### 7.1 Terminal Orchestrator (`main.py`)
+
+Run the following command:
+
+```bash
+python main.py
+```
+
+### 7.2 Startup Notice — Please Be Patient
+
+Launching `main.py` takes some time to load.
+
+During startup, **Agent 3 (Knowledge Agent)** must:
+
+1. Load the Hugging Face embedding model `sentence-transformers/all-MiniLM-L6-v2` locally.
+2. Parse the study documents in `data/study_materials/`.
+3. Build the Vector Index in memory.
+
+Once initialization finishes, the main terminal menu appears.
+
+<img width="1088" height="792" alt="Main terminal menu" src="https://github.com/user-attachments/assets/0175a5a1-fc8f-4a36-a8d1-80dd759b383e" />
+
+### 7.3 User Profile
+
+The `user.json` file contains information about the specific user's profile and lifestyle.
+
+<img width="986" height="602" alt="User profile" src="https://github.com/user-attachments/assets/005e0778-ab9a-400d-a1e4-ec1a3e040832" />
 
 
-8. Operational Modes & Verification Guide<br>
-        Mode 1: Direct Task Scheduling(Agent 1)<br>
+## 8. Operational Modes & Verification Guide
+            
+  Mode 1: Direct Task Scheduling(Agent 1)<br>
                Directly schedule tasks using natural language. Agent 1 audits existing calendar events and injects the new task into a conflict-free slot while respecting profile constraints (curfews, meal windows).<br>
                Trigger: Type 1, then enter a task description:<br>
                ```bash
