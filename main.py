@@ -1,3 +1,4 @@
+import re
 import os
 import json
 import datetime
@@ -43,15 +44,38 @@ def process_and_schedule_input(raw_text: str, scheduling_agent, workflow_agent):
         print(f"\n[AUDIT LOG]\n{schedule_data.calendar_audit_log}\n")
         print("[AGENT 1] Executing real-world actions...")
         
+        registry = load_task_registry()
+
         for task in schedule_data.schedule:
+
             if hasattr(task, 'is_new_task') and not task.is_new_task:
                 continue
-            if current_schedule != "No events scheduled for the upcoming window." and task.task_name.strip().lower() in current_schedule.lower():
-                print(f"[SHIELD] Blocked duplicate event: {task.task_name}")
+
+            task_id = generate_task_id(task.task_name)
+
+            if is_duplicate_task(task.task_name, registry):
+                print(f"[SHIELD] Blocked duplicate task: {task.task_name}")
                 continue
-                
-            add_to_calendar(task.task_name, task.start_time, task.end_time, task.location)
-            
+
+            print(f"[VALIDATOR] Approved new task: {task.task_name}")
+
+            add_to_calendar(
+                f"[KAIROS] {task.task_name}",
+                task.start_time,
+                task.end_time,
+                task.location
+            )
+
+            registry["tasks"].append({
+                "task_id": task_id,
+                "task_name": task.task_name,
+                "source": "email",
+                "start_time": task.start_time,
+                "end_time": task.end_time,
+                "status": "scheduled"
+            })
+
+        save_task_registry(registry) 
         print("\n[SUCCESS] Tasks pushed to Google Calendar!")
 
 def main():
@@ -98,15 +122,38 @@ def main():
                 print(f"\n[AUDIT LOG]\n{schedule_data.calendar_audit_log}\n")
                 print("[AGENT 1] Executing real-world actions...")
                 
+                registry = load_task_registry()
+
                 for task in schedule_data.schedule:
+
                     if hasattr(task, 'is_new_task') and not task.is_new_task:
                         continue
-                    if current_schedule != "No events scheduled for the upcoming window." and task.task_name.strip().lower() in current_schedule.lower():
-                        print(f"[SHIELD] Blocked duplicate event: {task.task_name}")
+
+                    task_id = generate_task_id(task.task_name)
+
+                    if is_duplicate_task(task.task_name, registry):
+                        print(f"[SHIELD] Blocked duplicate task: {task.task_name}")
                         continue
-                        
-                    add_to_calendar(task.task_name, task.start_time, task.end_time, task.location)
-                    
+
+                    print(f"[VALIDATOR] Approved new task: {task.task_name}")
+
+                    add_to_calendar(
+                        f"[KAIROS] {task.task_name}",
+                        task.start_time,
+                        task.end_time,
+                        task.location
+                    )
+
+                    registry["tasks"].append({
+                        "task_id": task_id,
+                        "task_name": task.task_name,
+                        "source": "direct",
+                        "start_time": task.start_time,
+                        "end_time": task.end_time,
+                        "status": "scheduled"
+                    })
+
+                save_task_registry(registry)
                 print("\n[SUCCESS] Tasks pushed to Google Calendar!")   
         elif mode == "2":
             raw_email = input("\nPaste the email/message here:\n> ")
@@ -151,6 +198,62 @@ def main():
                     print(f"\n[AGENT 4 - FITNESS]\n{answer}")
         else:
             continue
+
+def normalize_task_name(name):
+    name = name.lower()
+    name = re.sub(r'[^a-z0-9\s]', '', name)
+    name = re.sub(r'\b(the|a|an)\b', '', name)
+    return " ".join(name.split())
+
+
+def generate_task_id(name):
+    return normalize_task_name(name).replace(" ", "_")
+
+
+def load_task_registry():
+    path = "data/task_registry.json"
+
+    if not os.path.exists(path):
+        return {"tasks": []}
+
+    with open(path, "r") as f:
+        return json.load(f)
+
+
+def save_task_registry(registry):
+    with open("data/task_registry.json", "w") as f:
+        json.dump(registry, f, indent=4)
+
+
+def is_duplicate_task(task_name, registry):
+    new_name = normalize_task_name(task_name)
+
+    for task in registry["tasks"]:
+        if normalize_task_name(task["task_name"]) == new_name:
+            return True
+
+    return False
+
+
+def parse_task_time(time_str, reference_date):
+    return datetime.strptime(
+        f"{reference_date} {time_str}",
+        "%Y-%m-%d %I:%M %p"
+    )
+
+
+def has_time_conflict(new_start, new_end, existing_events):
+    for event in existing_events:
+        try:
+            existing_start = event["start"]
+            existing_end = event["end"]
+
+            if new_start < existing_end and new_end > existing_start:
+                return True
+        except:
+            continue
+
+    return False
 
 if __name__ == "__main__":
     main()

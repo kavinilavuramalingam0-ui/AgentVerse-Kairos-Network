@@ -19,7 +19,7 @@ class ResilientLLMClient:
         if self.groq_client:
             try:
                 response = self.groq_client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
+                    model= "qwen/qwen3.6-27b",
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt}
@@ -35,7 +35,7 @@ class ResilientLLMClient:
             try:
                 full_prompt = f"System: {system_prompt}\nUser Input: {user_prompt}"
                 response = self.gemini_client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-3.6-flash",
                     contents=full_prompt
                 )
                 return f"[Source: Google Gemini]\n{response.text}"

@@ -12,16 +12,13 @@ class SchedulingAgent:
         self.user_profile = profile_data
         
         self.llm = ChatGroq(
-            model="llama-3.3-70b-versatile",
+            model="qwen/qwen3.6-27b",
             temperature=0.1,
-            max_tokens=2048
+            max_tokens=2048,
+            reasoning_effort="none"
         )
         
-        self.structured_llm = self.llm.with_structured_output(DailySchedule)
-        
-        # Inside agents/scheduling_agent/agent.py
-
-        # Inside agents/scheduling_agent/agent.py
+        self.structured_llm = self.llm.with_structured_output(DailySchedule, method="json_mode")
 
         self.prompt = ChatPromptTemplate.from_messages([
             ("system", 
@@ -39,14 +36,22 @@ class SchedulingAgent:
              "3. STRICT AVOIDANCE: If an event spans 5:00 PM to 10:00 PM, that 5-hour block is a DEAD ZONE. Find an earlier or later gap.\n"
              "4. CLASSIFICATION: Set 'is_new_task' to false for existing calendar events. Set to true ONLY for the brand new extracted tasks.\n"
              "5. TIME MATH: Ensure end_time strictly follows start_time + duration_mins.\n"
-             "6. PASSIVE TASKS (CRITICAL): Ignore tasks that do not require active human effort (e.g., 'drying clothes', 'waiting for Docker containers to build', 'system updates'). Do NOT output these into the schedule array."
-            ),
+             "6. PASSIVE TASKS (CRITICAL): Ignore tasks that do not require active human effort. Do NOT output these into the schedule array.\n"
+             "7. OUTPUT FORMAT (MANDATORY): Return exactly one JSON object using these exact top-level keys: "
+                "calendar_audit_log (string), date_context (string), total_tasks (integer), and schedule (array). "
+                "Do NOT use 'scheduled_tasks'. 'calendar_audit_log' MUST be a plain string, NOT an object. "
+                "Each object inside 'schedule' MUST contain exactly these fields: task_name, reasoning, "
+                "is_new_task, start_time, end_time, duration_mins, location, priority, and notes. "
+                "Do not rename fields, add extra top-level fields, or output markdown/code fences.\n"
+            "8. DUPLICATE PREVENTION: Never schedule a task if an equivalent task already exists in the existing calendar.\n"
+            "9. TIME CONFLICT: Never schedule a new task over an existing calendar event. Existing events are hard blocked time.\n"
+            "10. CROSS-MIDNIGHT: Treat times after midnight as belonging to the following calendar day when calculating duration and conflicts.\n"
+            "11. TASK ID: Generate a stable lowercase task_id from the task name, using words separated by underscores.\n"),
             ("human", "Here are the tasks to analyze and schedule:\n{tasks}")
         ])
-        
         self.chain = self.prompt | self.structured_llm
 
-    def schedule_day(self, raw_input_text: str, existing_schedule_text: str, current_time_str: str) -> DailySchedule:
+    def schedule_day(self, raw_input_text: str, existing_schedule_text: str, current_time_str: str):
         print("[System] Kairos Network Pipeline Initiated (Time-Aware)...")
         try:
             return self.chain.invoke({

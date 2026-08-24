@@ -12,7 +12,7 @@ class KnowledgeAgent:
         print("[System] Initializing Agent 3 (Knowledge & RAG)...")
         
         # 1. Configure the LLM (Groq) for Generation
-        self.llm = Groq(model="llama-3.3-70b-versatile", api_key=os.getenv("GROQ_API_KEY"))
+        self.llm = Groq(model="qwen/qwen3.6-27b", api_key=os.getenv("GROQ_API_KEY"))
         
         # 2. Configure the Embedding Model for Semantic Search
         # This runs locally to convert text into numbers

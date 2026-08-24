@@ -11,6 +11,8 @@ class ScheduledTask(BaseModel):
     location: str = Field(description="Location of the task")
     priority: str = Field(description="High, Medium, or Low")
     notes: str = Field(default="", description="Additional context")
+    task_id: str = Field(default="", description="Unique identifier for the task")
+    source: str = Field(default="", description="Source of task: direct, email, autonomous, or other")
 
 class DailySchedule(BaseModel):
     # THE FIX: This forces the LLM to reason about time before generating the schedule.

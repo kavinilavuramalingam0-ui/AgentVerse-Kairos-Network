@@ -9,9 +9,10 @@ load_dotenv()
 class WorkflowAgent:
     def __init__(self):
         self.llm = ChatGroq(
-            model="llama-3.3-70b-versatile",
+            model="qwen/qwen3.6-27b",
             temperature=0.1, 
-            max_tokens=1024
+            max_tokens=2048,
+            reasoning_effort="none"
         )
         
         self.structured_llm = self.llm.with_structured_output(EmailAnalysis)
@@ -25,7 +26,8 @@ class WorkflowAgent:
              "2. ACTION VERBS: Look for explicit calls to action like 'Apply Here', 'Register Now', or 'Submit'.\n"
              "3. IGNORE TRUE SPAM: Ignore generic marketing fluff, but NEVER ignore career or academic opportunities.\n"
              "4. ESTIMATIONS: Estimate realistic durations (e.g., 'Apply for Internship' ~30 mins, 'OS study prep' ~90 mins).\n"
-             "5. CRITICAL SCHEMA RULE: When calling the tool, the 'estimated_duration_mins' parameter MUST be a raw integer (e.g., 30). DO NOT wrap it in quotes (e.g., '30').\n\n"
+             "5. TASK IDENTITY: Extract the task name consistently so equivalent tasks produce the same task identity.\n"
+             "6. CRITICAL SCHEMA RULE: When calling the tool, the 'estimated_duration_mins' parameter MUST be a raw integer (e.g., 30). DO NOT wrap it in quotes (e.g., '30').\n\n"
              "If the message contains absolutely no academic, professional, or actionable items, return an empty list."
             ),
             ("human", "Analyze this inbound message:\n\n{message}")
