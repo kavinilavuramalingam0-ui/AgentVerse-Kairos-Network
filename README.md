@@ -253,7 +253,7 @@ This is similar to NotebookLM or ChatGPT when used for studying. When you sit do
 
 Current Limitation: Agent 3 is currently not connected to Google Classroom or email. The data/study_materials directory currently contains static files that are supplied to the LLM for Data Science-related questions.
 
-<img width="1887" height="927" alt="image" src="https://github.com/user-attachments/assets/560f39c8-f642-46a0-831b-187e92449498" /> ```
+<img width="1887" height="927" alt="image" src="https://github.com/user-attachments/assets/560f39c8-f642-46a0-831b-187e92449498" /> 
 <br><br>
 
 ### Mode 5: Dynamic Fitness Coach (Agent 4 - Tool Calling)
@@ -264,6 +264,8 @@ A contextual workout coach built with **pure LangChain Expression Language (LCEL
 
 ```text
 I'm exhausted. Give me a 45-second timer for a quick stretch using the run_timer tool.
+```
+```text
 I had tamarind rice for lunch, my stomach feels bloated, but I don't want to skip my workout schedule today.
 ```
 
@@ -286,7 +288,6 @@ A static workout schedule also doesn't adapt dynamically to how you feel at that
 To reduce this tool-switching time, Agent 4 works as an action-oriented fitness coach. A set of pregenerated_Exercises is fed into the LLM along with your current constraints. The LLM selects a suitable pre-generated exercise and immediately starts a quick timer using the tool.
 
 This demonstrates tool calling + contextual reasoning, where the agent doesn't simply generate text but interprets the user's current situation, selects an appropriate action, and executes the required tool.
-
      <img width="1881" height="903" alt="image" src="https://github.com/user-attachments/assets/cd339d51-a213-449d-8c55-e218e69a204f" /><br>
      <img width="1486" height="957" alt="image" src="https://github.com/user-attachments/assets/9fec4523-f24c-42f9-aae0-9e98e9e61ae4" /><br>
      <img width="942" height="1000" alt="image" src="https://github.com/user-attachments/assets/aef65d2d-2d1a-43f0-813c-6019b71f49c6" /><br>
