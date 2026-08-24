@@ -10,7 +10,7 @@ An autonomous personal AI companion and event-driven multi-agent ecosystem built
 
 ---
 
-## System Architecture
+### System Architecture
 
 ```text
 ===================================================================================
@@ -40,18 +40,20 @@ An autonomous personal AI companion and event-driven multi-agent ecosystem built
 - Google Calendar API                     - Hugging Face Embed - OS Winsound Beep
 - Gmail Inbox API (OAuth2)                - LlamaIndex Store   - Visual Exercises
 ```
-## Directory Structure<br>
+### Directory Structure<br>
 <img width="613" height="761" alt="image" src="https://github.com/user-attachments/assets/376c7c68-22bf-458e-ade7-a956e4c0aae8" />
 
-## Installation & Setup<br>
-1. Clone the Repository
+### Installation & Setup<br>
+## 1. Clone the Repository
    ```bash
    git clone https://github.com/kavinilavuramalingam0-ui/AgentVerse-Kairos-Network.git
    cd AgentVerse-Kairos-Network
    ```
    <br>
-2. Install Required Dependencies<br>
+   
+## 2. Install Required Dependencies<br>
    Run the following package installations in your Python environment:
+   
    ```bash
     #Core LLM, schema validation, and environment variables
     pip install groq google-genai python-dotenv pydantic
@@ -63,7 +65,8 @@ An autonomous personal AI companion and event-driven multi-agent ecosystem built
     pip install langchain langchain-groq langchain-core google-api-python-client google-auth-httplib2 google-auth-oauthlib
    ```
 <br>
-3. Configure API Credentials (.env)<br>
+
+## 3. Configure API Credentials (.env)<br>
    Create a .env file in the root folder and add your LLM keys:
    
    ```bash
@@ -71,45 +74,54 @@ An autonomous personal AI companion and event-driven multi-agent ecosystem built
    GEMINI_API_KEY=AIza_your_gemini_api_key_here
    ```
 <br>
-4. Configure Google Cloud OAuth2.0 (credentials.json)<br>
-   The Scheduling and Workflow agents require permissions to read/write Google Calendar events and poll Gmail.<br>
-   
-        1. Go to the Google Cloud Console (https://console.cloud.google.com/)<br>
-        2. Create a project named AgentVerse-Hackathon.<br>
-        3. Enable both Google Calendar API and Gmail API under APIs & Services > Library.<br>
-      <img width="898" height="497" alt="Screenshot 2026-08-24 114757" src="https://github.com/user-attachments/assets/b6e207d1-496a-4ff2-be74-93401347244f" /><br>
-        4. Configure the OAuth Consent Screen:
-        Set User Type to External<br>
-      <img width="627" height="486" alt="Screenshot 2026-08-24 115140" src="https://github.com/user-attachments/assets/d1dfb1d9-1edd-498a-8129-fb3a3460db29" /><br>
-        Add your personal Gmail under Test Users.<br>
-        5. Navigate to Credentials > Create Credentials > OAuth client ID.
-        Application Type: Desktop App<br>
-        6. Download the client secrets JSON, rename it to credentails.json, and place it in the project root directory<br>
-        
-5. Understanding Google OAuth2 Authentication & token.json<br>
-   Because there is no web UI, everything runs directly in your terminal. When launching the project for the first time, token.json will not exist.<br>
-   
-        What is token.json?<br>
-                It is locally generated security badge containing temporary access and refresh tokens. It securely allows the Python agents to query Google APIs on your behalf without prompting a browser login on every single execution.<br>
-        The "Google hasn't verified this app" Screen:
-        When you trigger Mode 1,2, or 3 for the first time, a browser window will open asking you to authenticate. Because your Google Cloud project is in personal development/testing status, Google presents an unverified app warning. This is completely safe to bypass for your own local code.<br>
-                Click Continue (or Advanced > Go to AgentVerse-Hackathon (unsafe)).<br>
-                On the permissions screen, select all checkboxes granting access to both Google Calendar and Gmail.<br>
-                Click Continue until the browser window displays "The authentication flow has completed. You may close this window."<br>
 
-   <img width="940" height="382" alt="image" src="https://github.com/user-attachments/assets/cd6f302c-1483-483f-9945-36626f86e318" /><br>
-   
-        Revoking or Resetting Tokens:<br>
-                 Deleting token.json removes the local session key and forces a fresh OAuth login on the next run.<br>
+## 4. Configure Google Cloud OAuth 2.0 (`credentials.json`)
 
-7. Running the Application<br>
+The Scheduling and Workflow agents require permissions to read/write Google Calendar events and poll Gmail.
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a project named `AgentVerse-Hackathon`.
+3. Enable both the **Google Calendar API** and **Gmail API**:
+   - Go to **APIs & Services → Library**.
+   - Search for **Google Calendar API** and enable it.
+   - Search for **Gmail API** and enable it.
+4. Configure the OAuth consent screen:
+   - Go to **APIs & Services → OAuth consent screen**.
+   - Configure the required application details.
+   - Add the required Google Calendar and Gmail scopes.
+5. Create OAuth credentials:
+   - Go to **APIs & Services → Credentials**.
+   - Click **Create Credentials → OAuth client ID**.
+   - Select the appropriate application type.
+   - Download the generated `credentials.json`.
+   - Place `credentials.json` in the required project folder.
+
+## 5. First-Time Authentication
+
+On the first run of the project, `token.json` will not exist.
+
+- **What is `token.json`?**  
+  It is a locally generated security badge containing temporary access and refresh tokens. It securely allows your Python agents to query Google APIs on your behalf without prompting a browser login on every single execution.
+
+- **The "Google hasn't verified this app" Screen**  
+  When you trigger the Scheduling or Workflow agents for the first time, a browser window will open asking you to authenticate. Because your Google Cloud project is in personal development/testing status, Google may present an unverified app warning. This is expected for local development.
+
+  1. Click **Continue** (or **Advanced → Go to AgentVerse-Hackathon (unsafe)**).
+  2. On the permissions screen, select all checkboxes granting access to both **Google Calendar** and **Gmail**.
+  3. Click **Continue** until the browser window displays **"The authentication flow has completed."**
+  4. You may close the browser window.
+
+## 6. Revoking or Resetting Tokens
+
+Deleting `token.json` removes the local session key and forces a fresh OAuth login on the next run.
+
+## 7. Running the Application<br>
 
    terminal orchestrator (main.py)<br>
    ```bash
    python main.py
    ```
 <br>
-
         Startup Notice-Please Be Patient:<br>
                 Launching main.py takes time to load. During startup, Agent 3 (Knowledge Agent) must load the Hugging Face embedding model (sentence-transformers/all-MiniLM-L6-v2) locally, parse your study documents in data/study_materials/, and build the Vector Index in memory. Once initialization finishes, the main terminal menu appears.<br>
    <img width="1088" height="792" alt="image" src="https://github.com/user-attachments/assets/0175a5a1-fc8f-4a36-a8d1-80dd759b383e" /><br>
@@ -118,7 +130,6 @@ An autonomous personal AI companion and event-driven multi-agent ecosystem built
 
 
 8. Operational Modes & Verification Guide<br>
-
         Mode 1: Direct Task Scheduling(Agent 1)<br>
                Directly schedule tasks using natural language. Agent 1 audits existing calendar events and injects the new task into a conflict-free slot while respecting profile constraints (curfews, meal windows).<br>
                Trigger: Type 1, then enter a task description:<br>
@@ -131,7 +142,6 @@ An autonomous personal AI companion and event-driven multi-agent ecosystem built
              The Goal of this agent: When you have so many tasks in your mind, don't know when and how to schedule them, don't remember your current schedule, you just give it a prompt "It's a college leave day, buy fruits in market and design a poster and get design approval from incharge faculty, wash clothes". The thing is user.json knows about you, what kind of a person you are, what environment you are living and so and so. So the agents sends both your task prompt query along with your user.json. So the LLM sees that the hostel_curfew_time is 05.00PM, outside_movement_allowed_window is 08:30 AM-05:00 PM so i can't schedule buying fruits outside this time window.<br>
      <img width="1917" height="886" alt="image" src="https://github.com/user-attachments/assets/947ba9e8-7b23-4c1c-8fa8-72271ab567b3" />
    <br><br>
-   
         Mode 2: Paste Email/Message Extraction(Agent 2->Agent 1)<br>
                Parse messy, unstructured text. Agent 2 extracts structured intents, task names, and estimated durations, handing them off to Agent 1 for automated calendar placement.<br>
                Trigger: Type 2, then paste raw communication text:<br>
@@ -147,7 +157,6 @@ An autonomous personal AI companion and event-driven multi-agent ecosystem built
      <img width="1917" height="916" alt="image" src="https://github.com/user-attachments/assets/f6a2476b-9635-402b-b321-3c67ab25f0d0" /><br>
      <img width="1917" height="918" alt="image" src="https://github.com/user-attachments/assets/50087072-b111-4099-afd1-4b6cb85bb4a4" /><br>
    <br><br>
-   
         Mode 3: Autonomous Background Monitor (Live Inbox)<br>
                Runs a continuous loop polling your Gmail inbox for unread messages. It filters spam, extracts academic/career tasks, schedules them, and marks the emails as read.<br>
                Trigger: Type 3. (Press Ctrl+C to stop monitoring)<br>
@@ -160,7 +169,6 @@ An autonomous personal AI companion and event-driven multi-agent ecosystem built
      <img width="1917" height="907" alt="image" src="https://github.com/user-attachments/assets/89408df9-7e01-4559-b325-d6266b9d6f1b" /><br>
      <img width="967" height="1010" alt="image" src="https://github.com/user-attachments/assets/229f1a4d-478c-4c6c-bd5f-cfd18c055bc8" /><br>
      <br><br>
-     
         Mode 4: Knowledge Agent/ Study Mode (Agent 3 - RAG)<br>
                A deterministic academic tutor powered by LlamaIndex and local Hugging Face embeddings. It answers technical subject queries grounded strictly in local documents.<br>
                Trigger: Type 4, then enter your subject question:<br>
@@ -173,7 +181,6 @@ An autonomous personal AI companion and event-driven multi-agent ecosystem built
                Current agent 3 does not hooked to google classroom or email, data/study_materials contains static files that are need to be supplied to the LLM for data science related questions.<br>
    <img width="1887" height="927" alt="image" src="https://github.com/user-attachments/assets/560f39c8-f642-46a0-831b-187e92449498" /><br>
    <br><br>
-   
        Mode 5: Dynamic Fitness Coach (Agent 4- Tool Calling)<br>
                A contextual workout coach built with pure LangChain Expression Language (LCEL). It recalculates exercise routines based on real-time constraints and triggers physical timers.<br>
                Trigger: Type 5, then enter constraints:<br>
