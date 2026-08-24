@@ -150,69 +150,143 @@ The `user.json` file contains information about the specific user's profile and 
 
 
 ## 8. Operational Modes & Verification Guide
-            
-  Mode 1: Direct Task Scheduling(Agent 1)<br>
-               Directly schedule tasks using natural language. Agent 1 audits existing calendar events and injects the new task into a conflict-free slot while respecting profile constraints (curfews, meal windows).<br>
-               Trigger: Type 1, then enter a task description:<br>
-               ```bash
-                 Complete OS Lab assignment for 2 hours this evening
-               ```
-               <br>
-             Terminal Flow: The agent outputs its reasoning, conflict checks, and event creation link.<br>
-             Tool Verification: Open Google Calendar in your browser to verify the block was created at the allocated time.<br>
-             The Goal of this agent: When you have so many tasks in your mind, don't know when and how to schedule them, don't remember your current schedule, you just give it a prompt "It's a college leave day, buy fruits in market and design a poster and get design approval from incharge faculty, wash clothes". The thing is user.json knows about you, what kind of a person you are, what environment you are living and so and so. So the agents sends both your task prompt query along with your user.json. So the LLM sees that the hostel_curfew_time is 05.00PM, outside_movement_allowed_window is 08:30 AM-05:00 PM so i can't schedule buying fruits outside this time window.<br>
-     <img width="1917" height="886" alt="image" src="https://github.com/user-attachments/assets/947ba9e8-7b23-4c1c-8fa8-72271ab567b3" />
-   <br><br>
-        Mode 2: Paste Email/Message Extraction(Agent 2->Agent 1)<br>
-               Parse messy, unstructured text. Agent 2 extracts structured intents, task names, and estimated durations, handing them off to Agent 1 for automated calendar placement.<br>
-               Trigger: Type 2, then paste raw communication text:<br>
-               ```bash
-                 > 📢 Opportunity to participate in Pep Sales Stars 2026! Apply Here before weekend...
-               ```
-               <br>
-               Terminal Flow: Agent 2 parses the text, extracts the actionable task, and Agent 1 schedules it.<br>
-               Tool Verification: Check your Google Calendar to confirm the registration block is booked.<br>
-               The Goal of this agent: agent 2 simply parses the text and calls agent 1 to schedule the task of "hackathon registration".<br>
-     <img width="1917" height="911" alt="image" src="https://github.com/user-attachments/assets/c29c8212-bb23-4bf0-b1aa-aa257da5643c" /><br>
-     <img width="1917" height="922" alt="image" src="https://github.com/user-attachments/assets/c721fcea-5315-452a-855b-9d807f782ae4" /><br>
-     <img width="1917" height="916" alt="image" src="https://github.com/user-attachments/assets/f6a2476b-9635-402b-b321-3c67ab25f0d0" /><br>
-     <img width="1917" height="918" alt="image" src="https://github.com/user-attachments/assets/50087072-b111-4099-afd1-4b6cb85bb4a4" /><br>
-   <br><br>
-        Mode 3: Autonomous Background Monitor (Live Inbox)<br>
-               Runs a continuous loop polling your Gmail inbox for unread messages. It filters spam, extracts academic/career tasks, schedules them, and marks the emails as read.<br>
-               Trigger: Type 3. (Press Ctrl+C to stop monitoring)<br>
-               Terminal Flow: Terminal Flow: The agent pings the Gmail API, processes unread messages, extracts tasks, and updates the calendar.<br>
-               Tool Verification:<br>
-                       Open Gmail and verify processed emails are marked as read.<br>
-                       Open Google Calendar and verify newly detected tasks appear.<br>
-               The Goal of this agent: When your email is loaded with Unstop, internshala, devfolio, devpost hackathon register email, you get worried, frustrated to check your inbox, even clicking the email becomes frustrating. Mode 3 runs on a loop, every time taking 5 unread email and parses them each for words like "Register", "apply", "complete" then calls agent 1 in action to schedule that register as a task in calendar.<br>
-     <img width="1917" height="912" alt="image" src="https://github.com/user-attachments/assets/00c0083a-8dfa-4045-9fa7-71e7c711609a" /><br>
-     <img width="1917" height="907" alt="image" src="https://github.com/user-attachments/assets/89408df9-7e01-4559-b325-d6266b9d6f1b" /><br>
-     <img width="967" height="1010" alt="image" src="https://github.com/user-attachments/assets/229f1a4d-478c-4c6c-bd5f-cfd18c055bc8" /><br>
-     <br><br>
-        Mode 4: Knowledge Agent/ Study Mode (Agent 3 - RAG)<br>
-               A deterministic academic tutor powered by LlamaIndex and local Hugging Face embeddings. It answers technical subject queries grounded strictly in local documents.<br>
-               Trigger: Type 4, then enter your subject question:<br>
-               ```bash
-                explain kurtosis with an analogy
-               ```
-               <br>
-               Terminal Flow: The agent executes semantic search across indexed chunks and synthesizes an answer directly in the terminal. Type back to return to the menu.<br>
-               The Goal of this agent: Your tutor/faculty mailed you that you are having a test on course Data Science's Normal distribution and pandas, Skewness and Kurtosis. Your Mode 3 takes that study email, parses and sends it to agent 1 for scheduling a study task in your calendar. Agent 3 in actions, reads your calendar that there is a study task scheduled, so i should go to google classroom to download those topic's resources(Normal_distribution.txt,Pandas_Describe_Final_With_Skewness_Kurtosis.txt) download them and store it inside data/study_materials. so even before you sit to complete that study task, your agent gets you ready with the necessary documents, you just prompt your question directly in the terminal, agent 3 sends those downloaded resources to the LLM along ith your question for reasoning. This is just like notebookLM, chatgpt when you use it for studying. But when you sit to study, you realise that you haven't downloaded those 10-15 files, that might seems frustrating. Also a LLM's generic answer is not preferred over context-resources supplied answers.<br>
-               Current agent 3 does not hooked to google classroom or email, data/study_materials contains static files that are need to be supplied to the LLM for data science related questions.<br>
-   <img width="1887" height="927" alt="image" src="https://github.com/user-attachments/assets/560f39c8-f642-46a0-831b-187e92449498" /><br>
-   <br><br>
-       Mode 5: Dynamic Fitness Coach (Agent 4- Tool Calling)<br>
-               A contextual workout coach built with pure LangChain Expression Language (LCEL). It recalculates exercise routines based on real-time constraints and triggers physical timers.<br>
-               Trigger: Type 5, then enter constraints:<br>
-               ```bash
-                 1. I'm exhausted. Give me a 45-second timer for a quick stretch using the run_timer tool.
-                 2. I had tamarind rice for lunch, my stomach feels bloated, but i don't want to skip my workout schedule today.
-               ```
-               <br>
-               Terminal Flow: Agent 4 adapts the prescription and executes the OS-level system timer tool.<br>
-               Tool Verification: When the timer reaches 0, the Python winsound engine will emit a physical, audible 1000Hz alert tone through your computer speakers.<br>
-               The Goal of this agent: Let's say your are full on your biriyani you had at 2 pm, now it's 4.30pm, you still feel bloated, but you don't want to skip your workout today. A normal workout schedule app, doesn't capture your perception that you had biriyani, so giving intense running sessions might cause you irritation, vomiting sensation. A static workout schedule app doesn't knows this, also going to an AI and asking for workout according to your perception is possible but involves tool switching(timer, LLM, image generation). sometime you don't understand the words given by AI(Alternating Reverse Lunges, seated incline bicep curls), so you might need an image that clearly shows the exercise preferred by the LLM. so in-order reduce tool switching time this agent 4 works in action with pregenerated_Exercises fed into the LLM along with your current health perception to suggest pregenerated_Exercise and starts up a quick timer.<br>
+
+### Mode 1: Direct Task Scheduling (Agent 1)
+
+Directly schedule tasks using natural language. Agent 1 audits existing calendar events and injects the new task into a conflict-free slot while respecting profile constraints (curfews, meal windows).
+
+**Trigger:** Type `1`, then enter a task description:
+
+```text
+Complete OS Lab assignment for 2 hours this evening
+```
+Terminal Flow: The agent outputs its reasoning, conflict checks, and event creation link.
+
+Tool Verification: Open Google Calendar in your browser to verify the block was created at the allocated time.
+
+The Goal of this Agent:
+When you have so many tasks in your mind, don't know when and how to schedule them, and don't remember your current schedule, you just give it a prompt:
+```text
+"It's a college leave day, buy fruits in market and design a poster and get design approval from incharge faculty, wash clothes."
+```
+
+The user.json knows about you, what kind of a person you are, what environment you are living in, and so on. The agent sends both your task prompt query along with your user.json. So the LLM sees that the hostel_curfew_time is 05:00 PM and outside_movement_allowed_window is 08:30 AM - 05:00 PM, so it cannot schedule buying fruits outside this time window.
+
+<img width="1917" height="886" alt="image" src="https://github.com/user-attachments/assets/947ba9e8-7b23-4c1c-8fa8-72271ab567b3" />
+<br><br>
+
+### Mode 2: Paste Email/Message Extraction (Agent 2 → Agent 1)
+
+Parse messy, unstructured text. Agent 2 extracts structured intents, task names, and estimated durations, handing them off to Agent 1 for automated calendar placement.
+
+**Trigger:** Type `2`, then paste raw communication text:
+
+```text
+📢 Opportunity to participate in Pep Sales Stars 2026! Apply Here before weekend...
+```
+
+**Terminal Flow:** Agent 2 parses the text, extracts the actionable task, and Agent 1 schedules it.
+
+**Tool Verification:** Check your Google Calendar to confirm the registration block is booked.
+
+**The Goal of this Agent:**
+
+Agent 2 simply parses the text and calls Agent 1 to schedule the task of **"hackathon registration"**.
+
+<img width="1917" height="911" alt="image" src="https://github.com/user-attachments/assets/c29c8212-bb23-4bf0-b1aa-aa257da5643c" />
+
+<img width="1917" height="922" alt="image" src="https://github.com/user-attachments/assets/c721fcea-5315-452a-855b-9d807f782ae4" />
+
+<img width="1917" height="916" alt="image" src="https://github.com/user-attachments/assets/f6a2476b-9635-402b-b321-3c67ab25f0d0" />
+
+<img width="1917" height="918" alt="image" src="https://github.com/user-attachments/assets/50087072-b111-4099-afd1-4b6cb85bb4a4" />
+<br><br>
+
+### Mode 3: Autonomous Background Monitor (Live Inbox)
+
+Runs a continuous loop polling your Gmail inbox for unread messages. It filters spam, extracts academic/career tasks, schedules them, and marks the emails as read.
+
+**Trigger:** Type `3`. Press `Ctrl+C` to stop monitoring.
+
+**Terminal Flow:** The agent pings the Gmail API, processes unread messages, extracts tasks, and updates the calendar.
+
+**Tool Verification:**
+
+- Open Gmail and verify processed emails are marked as read.
+- Open Google Calendar and verify newly detected tasks appear.
+
+**The Goal of this Agent:**
+
+When your email is loaded with Unstop, Internshala, Devfolio, Devpost hackathon registration emails, etc., you get worried and frustrated checking your inbox. Mode 3 runs on a loop, every time taking 5 unread emails and parsing them for words like **"Register"**, **"Apply"**, and **"Complete"**, then calls Agent 1 to schedule that registration as a task in the calendar.
+
+<img width="1917" height="912" alt="image" src="https://github.com/user-attachments/assets/00c0083a-8dfa-4045-9fa7-71e7c711609a" />
+
+<img width="1917" height="907" alt="image" src="https://github.com/user-attachments/assets/89408df9-7e01-4559-b325-d6266b9d6f1b" />
+
+<img width="967" height="1010" alt="image" src="https://github.com/user-attachments/assets/229f1a4d-478c-4c6c-bd5f-cfd18c055bc8" />
+<br><br>
+
+### Mode 4: Knowledge Agent / Study Mode (Agent 3 - RAG)
+
+A deterministic academic tutor powered by **LlamaIndex** and **local Hugging Face embeddings**. It answers technical subject queries grounded strictly in local study materials.
+
+**Trigger:** Type `4`, then enter your subject question.
+
+```text
+explain kurtosis with an analogy
+```
+**Terminal Flow:** The agent performs semantic search across indexed document chunks and synthesizes an answer directly in the terminal. Type back to return to the menu.
+
+**The Goal of this Agent:**
+our tutor/faculty has mailed you that you have a test on Data Science topics such as Normal Distribution, Pandas, Skewness, and Kurtosis. Mode 3 takes that study email, parses it, and sends it to Agent 1, which schedules a study task in your calendar.
+
+Agent 3 reads your calendar and identifies that a study task has been scheduled. It should then go to Google Classroom and download the required topic resources, such as:
+
+Normal_distribution.txt
+Pandas_Describe_Final_With_Skewness_Kurtosis.txt
+
+These resources are stored inside data/study_materials.
+
+Even before you sit down to complete the study task, the agent prepares the necessary study documents for you. You can then enter your question directly in the terminal. Agent 3 sends the relevant resources to the LLM along with your question, allowing it to reason over the provided context.
+
+This is similar to NotebookLM or ChatGPT when used for studying. When you sit down to study, you may realize that you haven't downloaded those 10–15 files, which can be frustrating. Additionally, a generic LLM answer may not be preferable to an answer grounded in your own supplied study materials.
+
+Current Limitation: Agent 3 is currently not connected to Google Classroom or email. The data/study_materials directory currently contains static files that are supplied to the LLM for Data Science-related questions.
+
+<img width="1887" height="927" alt="image" src="https://github.com/user-attachments/assets/560f39c8-f642-46a0-831b-187e92449498" /> ```
+<br><br>
+
+### Mode 5: Dynamic Fitness Coach (Agent 4 - Tool Calling)
+
+A contextual workout coach built with **pure LangChain Expression Language (LCEL)**. It dynamically adapts exercise recommendations based on real-time constraints and can trigger physical timers through an OS-level tool.
+
+**Trigger:** Type `5`, then enter your current workout constraints or request:
+
+```text
+I'm exhausted. Give me a 45-second timer for a quick stretch using the run_timer tool.
+I had tamarind rice for lunch, my stomach feels bloated, but I don't want to skip my workout schedule today.
+```
+
+**Terminal Flow:** Agent 4 analyzes your current physical constraints, selects an appropriate exercise from the pre-generated exercise library, and executes the OS-level system timer tool.
+
+**Tool Verification:**
+
+- The selected exercise is displayed in the terminal.
+- The run_timer tool starts the requested countdown.
+- When the timer reaches 0, the Python winsound engine emits a physical, audible 1000Hz alert tone through your computer speakers.
+
+**The Goal of this Agent:**
+
+Let's say you had a full biryani meal at 2:00 PM, and by 4:30 PM you still feel bloated, but you don't want to skip your workout for the day.
+
+A normal workout scheduling app doesn't capture your current perception or physical constraints. It may prescribe an intense running session even when you're feeling uncomfortable, which can make the workout unpleasant or potentially worsen the discomfort.
+
+A static workout schedule also doesn't adapt dynamically to how you feel at that moment. While you could ask an LLM for a suitable workout, that can involve switching between multiple tools — the LLM, a timer, and potentially image generation when you don't understand an exercise such as Alternating Reverse Lunges or Seated Incline Bicep Curls.
+
+To reduce this tool-switching time, Agent 4 works as an action-oriented fitness coach. A set of pregenerated_Exercises is fed into the LLM along with your current constraints. The LLM selects a suitable pre-generated exercise and immediately starts a quick timer using the tool.
+
+This demonstrates tool calling + contextual reasoning, where the agent doesn't simply generate text but interprets the user's current situation, selects an appropriate action, and executes the required tool.
+
      <img width="1881" height="903" alt="image" src="https://github.com/user-attachments/assets/cd339d51-a213-449d-8c55-e218e69a204f" /><br>
      <img width="1486" height="957" alt="image" src="https://github.com/user-attachments/assets/9fec4523-f24c-42f9-aae0-9e98e9e61ae4" /><br>
      <img width="942" height="1000" alt="image" src="https://github.com/user-attachments/assets/aef65d2d-2d1a-43f0-813c-6019b71f49c6" /><br>
