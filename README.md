@@ -114,11 +114,11 @@ On the first run of the project, `token.json` will not exist.
   4. You may close the browser window.
      <img width="940" height="382" alt="image" src="https://github.com/user-attachments/assets/cd6f302c-1483-483f-9945-36626f86e318" /><br>
 
-## 6. Revoking or Resetting Tokens and user.json
+## 6. Revoking or Resetting Tokens and user_profile.json
 
 Deleting `token.json` removes the local session key and forces a fresh OAuth login on the next run.
 ```bash
-"_instruction": "Fill user.json file according to your lifestyle and preferences."
+"_instruction": "Fill user_profile.json file according to your lifestyle and preferences."
 ```
 
 ## 7. Running the Application
